@@ -55,12 +55,12 @@ import ortus.boxlang.web.exchange.BoxCookie;
 class SpringBoxHTTPExchangeTest {
 
 	@Mock
-	private HttpServletRequest	request;
+	private HttpServletRequest		request;
 
 	@Mock
-	private HttpServletResponse	response;
+	private HttpServletResponse		response;
 
-	private SpringBoxHTTPExchange exchange;
+	private SpringBoxHTTPExchange	exchange;
 
 	@BeforeEach
 	void setUp() {

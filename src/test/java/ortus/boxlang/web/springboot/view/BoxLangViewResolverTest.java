@@ -217,8 +217,8 @@ class BoxLangViewResolverTest {
 
 	@Test
 	void resolveViewName_localeIsIgnored_samePathRegardlessOfLocale() throws Exception {
-		Resource r1 = mock( Resource.class );
-		Resource r2 = mock( Resource.class );
+		Resource	r1	= mock( Resource.class );
+		Resource	r2	= mock( Resource.class );
 		when( r1.exists() ).thenReturn( false );
 		when( r2.exists() ).thenReturn( false );
 

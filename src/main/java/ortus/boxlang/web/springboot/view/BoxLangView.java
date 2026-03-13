@@ -30,16 +30,13 @@ import ortus.boxlang.runtime.scopes.IScope;
 import ortus.boxlang.runtime.scopes.Key;
 import ortus.boxlang.runtime.types.exceptions.AbortException;
 import ortus.boxlang.runtime.types.exceptions.BoxRuntimeException;
-import ortus.boxlang.runtime.types.exceptions.ExceptionUtil;
 import ortus.boxlang.runtime.types.exceptions.MissingIncludeException;
 import ortus.boxlang.web.context.WebRequestBoxContext;
 import ortus.boxlang.web.handlers.WebErrorHandler;
-import ortus.boxlang.web.springboot.BoxLangAutoConfiguration;
 import ortus.boxlang.web.springboot.exchange.SpringBoxHTTPExchange;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.logging.LogLevel;
 import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.View;
 

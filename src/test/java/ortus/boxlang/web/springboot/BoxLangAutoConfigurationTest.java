@@ -79,29 +79,29 @@ class BoxLangAutoConfigurationTest {
 
 	@Test
 	void boxLangViewResolver_usesDefaultOrder() {
-		BoxLangAutoConfiguration config = configWith( new BoxLangProperties() );
-		BoxLangViewResolver resolver = config.boxLangViewResolver();
+		BoxLangAutoConfiguration	config		= configWith( new BoxLangProperties() );
+		BoxLangViewResolver			resolver	= config.boxLangViewResolver();
 		assertThat( resolver.getOrder() ).isEqualTo( Integer.MAX_VALUE - 5 );
 	}
 
 	@Test
 	void boxLangViewResolver_usesDefaultPrefix() {
-		BoxLangAutoConfiguration config = configWith( new BoxLangProperties() );
-		BoxLangViewResolver resolver = config.boxLangViewResolver();
+		BoxLangAutoConfiguration	config		= configWith( new BoxLangProperties() );
+		BoxLangViewResolver			resolver	= config.boxLangViewResolver();
 		assertThat( resolver.getPrefix() ).isEqualTo( "classpath:/templates/" );
 	}
 
 	@Test
 	void boxLangViewResolver_usesDefaultSuffix() {
-		BoxLangAutoConfiguration config = configWith( new BoxLangProperties() );
-		BoxLangViewResolver resolver = config.boxLangViewResolver();
+		BoxLangAutoConfiguration	config		= configWith( new BoxLangProperties() );
+		BoxLangViewResolver			resolver	= config.boxLangViewResolver();
 		assertThat( resolver.getSuffix() ).isEqualTo( ".bxm" );
 	}
 
 	@Test
 	void boxLangViewResolver_usesDefaultWebRoot() {
-		BoxLangAutoConfiguration config = configWith( new BoxLangProperties() );
-		BoxLangViewResolver resolver = config.boxLangViewResolver();
+		BoxLangAutoConfiguration	config		= configWith( new BoxLangProperties() );
+		BoxLangViewResolver			resolver	= config.boxLangViewResolver();
 		assertThat( resolver.getWebRoot() ).isEmpty();
 	}
 
@@ -109,9 +109,9 @@ class BoxLangAutoConfigurationTest {
 	void boxLangViewResolver_propagatesCustomPrefix() {
 		BoxLangProperties props = new BoxLangProperties();
 		props.setPrefix( "classpath:/myviews/" );
-		BoxLangAutoConfiguration config = configWith( props );
+		BoxLangAutoConfiguration	config		= configWith( props );
 
-		BoxLangViewResolver resolver = config.boxLangViewResolver();
+		BoxLangViewResolver			resolver	= config.boxLangViewResolver();
 
 		assertThat( resolver.getPrefix() ).isEqualTo( "classpath:/myviews/" );
 	}
@@ -120,9 +120,9 @@ class BoxLangAutoConfigurationTest {
 	void boxLangViewResolver_propagatesCustomSuffix() {
 		BoxLangProperties props = new BoxLangProperties();
 		props.setSuffix( ".cfm" );
-		BoxLangAutoConfiguration config = configWith( props );
+		BoxLangAutoConfiguration	config		= configWith( props );
 
-		BoxLangViewResolver resolver = config.boxLangViewResolver();
+		BoxLangViewResolver			resolver	= config.boxLangViewResolver();
 
 		assertThat( resolver.getSuffix() ).isEqualTo( ".cfm" );
 	}
@@ -131,9 +131,9 @@ class BoxLangAutoConfigurationTest {
 	void boxLangViewResolver_propagatesCustomOrder() {
 		BoxLangProperties props = new BoxLangProperties();
 		props.setViewResolverOrder( 5 );
-		BoxLangAutoConfiguration config = configWith( props );
+		BoxLangAutoConfiguration	config		= configWith( props );
 
-		BoxLangViewResolver resolver = config.boxLangViewResolver();
+		BoxLangViewResolver			resolver	= config.boxLangViewResolver();
 
 		assertThat( resolver.getOrder() ).isEqualTo( 5 );
 	}
@@ -142,9 +142,9 @@ class BoxLangAutoConfigurationTest {
 	void boxLangViewResolver_propagatesCustomWebRoot() {
 		BoxLangProperties props = new BoxLangProperties();
 		props.setWebRoot( "/opt/myapp/www" );
-		BoxLangAutoConfiguration config = configWith( props );
+		BoxLangAutoConfiguration	config		= configWith( props );
 
-		BoxLangViewResolver resolver = config.boxLangViewResolver();
+		BoxLangViewResolver			resolver	= config.boxLangViewResolver();
 
 		assertThat( resolver.getWebRoot() ).isEqualTo( "/opt/myapp/www" );
 	}
@@ -156,9 +156,9 @@ class BoxLangAutoConfigurationTest {
 		props.setSuffix( ".bxm" );
 		props.setViewResolverOrder( 10 );
 		props.setWebRoot( "/var/www" );
-		BoxLangAutoConfiguration config = configWith( props );
+		BoxLangAutoConfiguration	config		= configWith( props );
 
-		BoxLangViewResolver resolver = config.boxLangViewResolver();
+		BoxLangViewResolver			resolver	= config.boxLangViewResolver();
 
 		assertThat( resolver.getPrefix() ).isEqualTo( "file:/views/" );
 		assertThat( resolver.getSuffix() ).isEqualTo( ".bxm" );
