@@ -42,6 +42,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * # Optional explicit web root for BoxLang mappings
  * boxlang.web-root=
+ *
+ * # Enable BoxLang debug mode (default: false)
+ * boxlang.debug-mode=false
  * </pre>
  */
 @ConfigurationProperties( prefix = "boxlang" )
@@ -94,6 +97,16 @@ public class BoxLangProperties {
 	 */
 	private String	webRoot				= "";
 
+	/**
+	 * Enable BoxLang debug mode.
+	 *
+	 * When {@code true}, the BoxLang runtime starts in debug mode, which enables
+	 * additional logging and diagnostic output.
+	 *
+	 * Default: {@code false}
+	 */
+	private boolean	debugMode			= false;
+
 	// -----------------------------------------------------------------------
 	// Getters and setters
 	// -----------------------------------------------------------------------
@@ -136,6 +149,14 @@ public class BoxLangProperties {
 
 	public void setWebRoot( String webRoot ) {
 		this.webRoot = webRoot;
+	}
+
+	public boolean isDebugMode() {
+		return this.debugMode;
+	}
+
+	public void setDebugMode( boolean debugMode ) {
+		this.debugMode = debugMode;
 	}
 
 }

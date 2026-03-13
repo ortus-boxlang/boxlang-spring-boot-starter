@@ -103,9 +103,10 @@ public class BoxLangAutoConfiguration implements SmartLifecycle, ResourceLoaderA
 
 	@Override
 	public void start() {
-		String configPath = resolveConfigPath();
-		logger.info( "BoxLang: initialising runtime (config='{}')", configPath != null ? configPath : "<defaults>" );
-		BoxRuntime.getInstance( false, configPath );
+		String	configPath	= resolveConfigPath();
+		boolean	debugMode	= this.properties.isDebugMode();
+		logger.info( "BoxLang: initialising runtime (config='{}', debug={})", configPath != null ? configPath : "<defaults>", debugMode );
+		BoxRuntime.getInstance( debugMode, configPath );
 		this.running = true;
 		logger.info( "BoxLang: runtime started" );
 	}
