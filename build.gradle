@@ -1,0 +1,408 @@
+import java.text.SimpleDateFormat
+import java.util.Date
+
+// https://docs.gradle.org/current/userguide/building_java_projects.html#sec:java_packaging
+plugins {
+    id 'java-library'
+    // For source code formatting
+    id "com.diffplug.spotless" version "8.1.0"
+    // Shadow (fat jar for standalone use)
+    id "com.gradleup.shadow" version "9.3.0"
+	// Download task
+    id "de.undercouch.download" version "5.6.0"
+	// Task visualizer
+	id "com.dorongold.task-tree" version "4.0.1"
+    // Maven Publisher
+    id 'maven-publish'
+    id 'signing'
+	id 'com.gradleup.nmcp.aggregation' version "1.4.2"
+}
+
+/**
+ * Project Properties
+ */
+ext {
+    buildID = System.getenv( 'BUILD_ID' ) ?: '0'
+    branch  = System.getenv( 'BRANCH' )   ?: 'development'
+}
+
+if ( branch == 'development' ) {
+    version = version.contains( '-' ) ? version.replaceAll( /-.*/, '-snapshot' ) : "${version}-snapshot".toString()
+	boxlangVersion = boxlangVersion.contains('-') ? boxlangVersion.replaceAll(/-.*/, '-snapshot') : "${boxlangVersion}-snapshot".toString()
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+/**
+ * Dependency Management — import Spring Boot BOM so library consumers
+ * can omit version numbers for Spring Boot managed deps.
+ */
+dependencies {
+    // ---------------------------------------------------------------
+    // BoxLang Core + WebSupport — implementation (transitive, bundled)
+	// Consumers get this automatically when they add boxlang-spring-boot
+    // ---------------------------------------------------------------
+    if ( file( '../boxlang/build/libs/boxlang-' + boxlangVersion + '.jar' ).exists() ) {
+        implementation files( '../boxlang/build/libs/boxlang-' + boxlangVersion + '.jar' )
+		implementation files( '../boxlang-web-support/build/libs/boxlang-web-support-' + boxlangVersion + '.jar' )
+    } else {
+		// Downloaded Dependencies
+        implementation files( 'src/test/resources/libs/boxlang-web-support-' + boxlangVersion + '.jar' )
+		implementation files( 'src/test/resources/libs/boxlang-' + boxlangVersion + '.jar' )
+    }
+
+    // ---------------------------------------------------------------
+    // Spring Boot — compileOnly; Spring Boot app provides them at runtime
+    // ---------------------------------------------------------------
+    compileOnly platform( "org.springframework.boot:spring-boot-dependencies:${springBootVersion}" )
+    compileOnly 'org.springframework.boot:spring-boot-autoconfigure'
+    compileOnly 'org.springframework:spring-webmvc'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+
+    // ---------------------------------------------------------------
+    // Testing
+    // ---------------------------------------------------------------
+    testImplementation platform( "org.springframework.boot:spring-boot-dependencies:${springBootVersion}" )
+    testImplementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation "org.junit.jupiter:junit-jupiter:6.+"
+    testImplementation "org.mockito:mockito-core:5.+"
+    testImplementation "com.google.truth:truth:1.+"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion( jdkVersion )
+    targetCompatibility = JavaVersion.toVersion( jdkVersion )
+    withJavadocJar()
+    withSourcesJar()
+}
+
+compileJava {
+    options.incremental = true
+    options.encoding    = 'UTF-8'
+    options.debug       = true
+}
+
+jar {
+    archiveVersion =  "${version}"
+ 	manifest {
+	   	attributes 'Description': "Spring Boot auto-configuration for BoxLang templating (.bxm view engine)"
+		attributes 'Implementation-Version': "${version}+${buildID}"
+		attributes 'Created-On': new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" ).format( new Date() )
+		attributes 'Created-By': "Ortus Solutions, Corp"
+    }
+}
+
+shadowJar {
+	archiveClassifier = ""
+    destinationDirectory = file( "build/distributions" )
+
+	// Configure duplicates strategy and service file merging for Shadow 9.0+
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
+	mergeServiceFiles()
+}
+
+// Relax Javadoc doclint: the html5 standard no longer mandates strict heading sequence
+// and missing-comment warnings (-Xdoclint:none suppresses all lint; we keep syntax checks).
+javadoc {
+    options.addBooleanOption( "Xdoclint:none", true )
+	options.addBooleanOption( 'html5', true )
+    options.encoding = 'UTF-8'
+}
+task zipJavadocs( type: Zip ) {
+	dependsOn javadoc
+	group "documentation"
+	from javadoc.destinationDir
+	archiveFileName = "${project.name}-javadocs-${version}.zip"
+	destinationDirectory = file( "$buildDir/distributions" )
+	// Output that the docs have been zippped
+	doLast {
+		println "+ Javadocs have been zipped to the distribution folder"
+	}
+}
+javadoc.finalizedBy( zipJavadocs )
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+spotless {
+    java {
+        eclipse().configFile( "./.ortus-java-style.xml" )
+        toggleOffOn()
+        removeUnusedImports()
+        formatAnnotations()
+    }
+}
+
+// ---------------------------------------------------------------
+// Maven Publishing
+// ---------------------------------------------------------------
+publishing {
+    publications {
+        shadow( MavenPublication ) { publication ->
+			artifact shadowJar
+			artifact javadocJar
+			artifact sourcesJar
+
+			// This is the only one sonatype accepts, not ortus.boxlang
+			// https://central.sonatype.com/
+			groupId = 'io.boxlang'
+			artifactId = 'boxlang-spring-boot-starter'
+			pom {
+				name = "BoxLang Spring Boot Starter"
+				description = "BoxLang is a dynamic multi-runtime JVM Language based on fluency and functional constructs. This Spring Boot Starter provides auto-configuration for using BoxLang as a view engine in Spring MVC applications."
+				url = "https://boxlang.io"
+				issueManagement {
+					system = "Jira"
+					url = "https://ortussolutions.atlassian.net/jira/software/c/projects/BL/issues"
+				}
+				mailingLists {
+					mailingList {
+						name = "BoxLang Community"
+						subscribe = "https://community.ortussolutions.com/c/boxlang/42"
+						unsubscribe = "https://community.ortussolutions.com/c/boxlang/42"
+					}
+				}
+				licenses {
+					license {
+						name = 'The Apache License, Version 2.0'
+						url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+					}
+				}
+				scm {
+					connection = 'scm:git:https://github.com/ortus-boxlang/boxlang-miniserver.git'
+					developerConnection = 'scm:git:ssh://github.com/ortus-boxlang/boxlang-miniserver.git'
+					url = 'https://github.com/ortus-boxlang/boxlang-miniserver'
+				}
+				developers{
+					developer {
+						id  = "lmajano"
+						name = "Luis Majano"
+						email = "lmajano@ortussolutions.com"
+						organization = "Ortus Solutions, Corp"
+						organizationUrl = "https://www.ortussolutions.com"
+					}
+					developer {
+						id = "bdw429s"
+						name = "Brad Wood"
+						email = "brad@ortussolutions.com"
+						organization = "Ortus Solutions, Corp"
+						organizationUrl = "https://www.ortussolutions.com"
+					}
+					developer {
+						id = "jclausen"
+						name = "Jon Clausen"
+						email = "jclausen@ortussolutions.com"
+						organization = "Ortus Solutions, Corp"
+						organizationUrl = "https://www.ortussolutions.com"
+					}
+					developer {
+						id = "michaelborn"
+						name = "Michael Born"
+						email = "michael@ortussolutions.com"
+						organization = "Ortus Solutions, Corp"
+						organizationUrl = "https://www.ortussolutions.com"
+					}
+					developer {
+						id = "garciadev"
+						name = "Daniel Garcia"
+						email = "dgarcia@ortussolutions.com"
+						organization = "Ortus Solutions, Corp"
+						organizationUrl = "https://www.ortussolutions.com"
+					}
+					developer {
+						id = "jbeers"
+						name = "Jacob Beers"
+						email = "jbeers@ortussolutions.com"
+						organization = "Ortus Solutions, Corp"
+						organizationUrl = "https://www.ortussolutions.com"
+					}
+					developer {
+						id = "ericpeterson"
+						name = "Eric Peterson"
+						email = "eric@ortussolutions.com"
+						organization = "Ortus Solutions, Corp"
+						organizationUrl = "https://www.ortussolutions.com"
+					}
+				}
+			}
+        }
+    }
+    repositories {
+        maven {
+            name = 'local-repo'
+            url = layout.buildDirectory.dir( "repo" )
+        }
+		maven {
+			name = "GitHubPackages"
+			url = "https://maven.pkg.github.com/ortus-boxlang/boxlang-spring-boot-starter"
+			credentials {
+				username = System.getenv( "GITHUB_ACTOR" )
+				password = System.getenv( "GITHUB_TOKEN" )
+			}
+		}
+    }
+}
+
+/**
+ * Maven Central Publishing
+ * Plugin Information here: https://github.com/gradleup/nmcp
+ */
+nmcpAggregation {
+	centralPortal {
+		username = System.getenv( "MAVEN_USERNAME" ) ?: findProperty( "maven_username" )
+		password = System.getenv( "MAVEN_PASSWORD" ) ?: findProperty( "maven_password" )
+		// Manual release from the Portal UI:
+		// publishingType = "USER_MANAGED"
+		// Or auto-release:
+		publishingType = "AUTOMATIC"
+	}
+
+	// Publishes all subprojects that apply 'maven-publish'
+  	publishAllProjectsProbablyBreakingProjectIsolation()
+}
+
+/**
+ * Digital Signing of assets using the ortus GPG Key
+ */
+signing {
+	// Check if we have environment variables for in-memory PGP keys (CI/CD)
+	def gpgKey = System.getenv( "GPG_KEY" )
+	def gpgPassword = System.getenv( "GPG_PASSWORD" )
+
+	if ( gpgKey && gpgPassword ) {
+		// Use in-memory PGP keys for CI/CD
+		useInMemoryPgpKeys( gpgKey, gpgPassword )
+	}
+	// Otherwise use traditional gradle.properties approach for local development
+
+    sign publishing.publications.shadow
+}
+
+/**
+ * Token Replacements for files
+ */
+import org.apache.tools.ant.filters.ReplaceTokens
+processResources {
+	// Replace @build.date@ with the current date in META-INF/version.properties file
+	filter( ReplaceTokens, tokens: [ 'build.date': new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" ).format( new Date() ) ] )
+	// Replace @build.version@ with the current version in META-INF/version.properties file
+	filter( ReplaceTokens, tokens: [ 'build.version': version + "+" + buildID ] )
+}
+
+/**
+ * BoxLang Download Task
+ */
+task downloadBoxLang( type: Download ) {
+	// Create the destination directory
+	doFirst {
+		file( "src/test/resources/libs" ).mkdirs()
+	}
+	// Configure the URLs of the files to download
+	src([
+		"https://downloads.ortussolutions.com/ortussolutions/boxlang/${boxlangVersion}/boxlang-${boxlangVersion}.jar",
+		"https://downloads.ortussolutions.com/ortussolutions/boxlang-runtimes/boxlang-web-support/${boxlangVersion}/boxlang-web-support-${boxlangVersion}.jar"
+	])
+	// Specify the destination directories for the downloaded files
+	dest "src/test/resources/libs/"
+    overwrite true
+    onlyIfModified false
+}
+
+/**
+ * Project Wide Helper function
+ * This is not a task, but a reusable UDF
+ */
+project.ext.bumpVersion = {
+	boolean major = false,
+	boolean minor = false,
+	boolean patch = false,
+	boolean beta = false,
+	boolean rc = false,
+	property = "version" ->
+
+	def propertiesFile = file( './gradle.properties' );
+	def properties = new Properties();
+
+	properties.load( propertiesFile.newDataInputStream() )
+	def versionTarget = major ? 0 : minor ? 1 : beta ? 2 : 3
+
+	def currentVersion = properties.getProperty( property )
+	def versionParts = currentVersion.split( '\\.' )
+	def newPathVersion = versionParts[ versionTarget ].toInteger() + 1
+	def newVersion = '';
+
+	if( patch ){
+		newVersion = "${versionParts[ 0 ]}.${versionParts[ 1 ]}.${newPathVersion}"
+	} else if( minor ){
+		newVersion = "${versionParts[ 0 ]}.${newPathVersion}.0"
+	} else if( major ){
+		newVersion = "${newPathVersion}.0.0"
+	} else if( beta ){
+		// Get's the -betaX version.
+		def betaString = currentVersion.split( '-' )[ 1 ]
+		// Now we get the beta number
+		def betaNumber = betaString.split( 'beta' )[ 1 ].toInteger() + 1
+		newVersion = currentVersion.split( '-' )[ 0 ] + "-beta${betaNumber}"
+	} else if( rc ){
+		newVersion = "${versionParts[ 0 ]}.${versionParts[ 1 ]}.${versionParts[ 2 ]}.${newPathVersion}"
+	}
+
+	properties.setProperty( property, newVersion )
+	properties.store( propertiesFile.newWriter(), null )
+
+	println "Bumped version from ${currentVersion} to ${newVersion}"
+}
+
+/**
+ * Bump the major version number
+ */
+task bumpMajorVersion {
+	doLast{
+		bumpVersion( true, false, false, false, false, "version" )
+	}
+}
+
+/**
+ * Bump the minor version number
+ */
+task bumpMinorVersion {
+	doLast{
+		bumpVersion( false, true, false, false, false, "version" )
+	}
+}
+
+/**
+ * Bump the patch version number
+ */
+task bumpPatchVersion {
+	doLast{
+		bumpVersion( false, false, true, false, false, "version" )
+	}
+}
+
+/**
+ * Bump the beta version number
+ */
+task bumpBetaVersion {
+	doLast{
+		bumpVersion( false, false, false, true, false, "version" )
+	}
+}
+/**
+ * Bump the rc version number
+ */
+task bumpRCVersion {
+	doLast{
+		bumpVersion( false, false, false, false, true, "version" )
+	}
+}

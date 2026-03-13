@@ -1,0 +1,27 @@
+<bx:output>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>#variables.title#</title>
+	<style>
+		body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+		h1   { color: ##2c5282; }
+		.badge { background: ##ebf8ff; color: ##2b6cb0; padding: .25rem .75rem; border-radius: 9999px; font-size: .875rem; }
+	</style>
+</head>
+<body>
+	<h1>#variables.title#</h1>
+
+	<p>This page is rendered by a <strong>BoxLang</strong> template inside a Spring Boot application.</p>
+	<p>Framework: <span class="badge">#variables.framework#</span></p>
+
+	<ul>
+		<li><a href="/greeting">Default greeting</a></li>
+		<li><a href="/greeting?name=Developer">Greeting with name</a></li>
+		<li><a href="/items">Items list</a></li>
+	</ul>
+</body>
+</html>
+</bx:output>

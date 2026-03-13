@@ -1,0 +1,3 @@
+rootProject.name = 'boxlang-spring-boot-starter'
+
+include ':test-app'

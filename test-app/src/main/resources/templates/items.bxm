@@ -1,0 +1,27 @@
+<bx:output>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Items List</title>
+	<style>
+		body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+		h1   { color: ##744210; }
+		ul   { background: ##fffbeb; border: 1px solid ##f6e05e; padding: 1.5rem 2rem; border-radius: .375rem; }
+		li   { margin: .5rem 0; }
+	</style>
+</head>
+<body>
+	<h1>Items (#variables.count#)</h1>
+
+	<ul>
+		<bx:loop array="#variables.items#" item="item">
+			<li>#encodeForHTML( item )#</li>
+		</bx:loop>
+	</ul>
+
+	<p><a href="/">&larr; Back to home</a></p>
+</body>
+</html>
+</bx:output>

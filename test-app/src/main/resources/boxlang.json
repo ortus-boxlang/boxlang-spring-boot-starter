@@ -1,0 +1,9 @@
+{
+	"debugMode": true,
+	"locale": "en_US",
+	"timezone": "UTC",
+	"logging": {
+		"logsDirectory": "./logs",
+		"level": "DEBUG"
+	}
+}

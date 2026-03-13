@@ -1,0 +1,24 @@
+.gradle
+build/**
+!gradle/wrapper/gradle-wrapper.jar
+bin/**
+
+### IntelliJ IDEA ###
+.idea/
+
+### Mac OS ###
+.DS_Store
+
+### BOXLANG ###
+grapher/**
+/libs/
+src/test/resources/libs/
+/wwwServerHome
+/www
+
+# Ignore local miniserver.json configuration files (but not .example)
+miniserver.json
+
+# TestApp
+test-app/build/**
+test-app/logs/**

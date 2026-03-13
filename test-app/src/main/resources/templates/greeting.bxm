@@ -1,0 +1,26 @@
+<bx:output>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Greeting</title>
+	<style>
+		body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+		h1   { color: ##276749; }
+		.message { background: ##f0fff4; border-left: 4px solid ##38a169; padding: 1rem; border-radius: .375rem; }
+	</style>
+</head>
+<body>
+	<h1>Greeting</h1>
+
+	<div class="message">
+		<p>#variables.message#</p>
+	</div>
+
+	<p>You requested a greeting for: <strong>#encodeForHTML( variables.name )#</strong></p>
+
+	<p><a href="/">&larr; Back to home</a></p>
+</body>
+</html>
+</bx:output>
