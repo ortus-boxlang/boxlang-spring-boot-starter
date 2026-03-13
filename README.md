@@ -24,6 +24,8 @@ The **BoxLang Spring Boot Starter** is a zero-configuration Spring Boot auto-con
 BoxRuntime boxlang = BoxRuntime.getInstance();
 ```
 
+You can find all the documentation about the BoxLang templating language here: https://boxlang.ortusbooks.com/boxlang-language/templating-language
+
 ---
 
 ## 📖 Table of Contents
@@ -95,7 +97,7 @@ BoxRuntime boxlang = BoxRuntime.getInstance();
 |---|---|
 | ☕ Java | 21+ |
 | 🍃 Spring Boot | 3.4.x+ |
-| ⚡ BoxLang | 1.11.0+ |
+| 🥊 BoxLang | 1.11.0+ |
 
 > **Note:** Make sure `JAVA_HOME` points to a JDK 21+ installation before building or running.
 
@@ -335,7 +337,7 @@ Place `boxlang.json` at `src/main/resources/boxlang.json` to customise language 
 }
 ```
 
-📚 Full `boxlang.json` documentation: https://boxlang.ortusbooks.com/configuration
+📚 Full `boxlang.json` documentation: https://boxlang.ortusbooks.com/getting-started/configuration
 
 ---
 
