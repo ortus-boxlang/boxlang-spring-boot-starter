@@ -45,6 +45,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * # Enable BoxLang debug mode (default: false)
  * boxlang.debug-mode=false
+ *
+ * # Override the BoxLang runtime home directory (default: null — uses ~/.boxlang)
+ * # boxlang.runtime-home=/path/to/boxlang-home
  * </pre>
  */
 @ConfigurationProperties( prefix = "boxlang" )
@@ -107,6 +110,23 @@ public class BoxLangProperties {
 	 */
 	private boolean	debugMode			= false;
 
+	/**
+	 * Override the BoxLang runtime home directory.
+	 *
+	 * The runtime home is where BoxLang stores its modules, cache, and other
+	 * runtime artefacts. When {@code null} (the default), BoxLang uses its
+	 * built-in default: {@code ${user.home}/.boxlang}.
+	 *
+	 * Typical overrides:
+	 * <ul>
+	 * <li>{@code /app/.boxlang} — fixed path inside a container image</li>
+	 * <li>{@code /mnt/boxlang} — volume-mounted path in Kubernetes</li>
+	 * </ul>
+	 *
+	 * Default: {@code null}
+	 */
+	private String	runtimeHome			= null;
+
 	// -----------------------------------------------------------------------
 	// Getters and setters
 	// -----------------------------------------------------------------------
@@ -157,6 +177,14 @@ public class BoxLangProperties {
 
 	public void setDebugMode( boolean debugMode ) {
 		this.debugMode = debugMode;
+	}
+
+	public String getRuntimeHome() {
+		return this.runtimeHome;
+	}
+
+	public void setRuntimeHome( String runtimeHome ) {
+		this.runtimeHome = runtimeHome;
 	}
 
 }
