@@ -264,6 +264,40 @@ boxlang-spring-boot-starter/
         └── resources/templates/        # Example .bxm templates
 ```
 
+## Development Tips
+
+### Hot-Reloading Templates
+
+By default the `boxlang.prefix` points at `classpath:/templates/`, which resolves to the compiled output directory (`build/resources/main/templates/`). Editing a `.bxm` source file has no effect until Gradle copies the updated resource — meaning a restart is usually required.
+
+**To get instant hot-reload without a restart**, switch the prefix to a `file:` path that points at the source tree. The easiest way is a Spring dev profile.
+
+#### 1. Create `application-dev.properties`
+
+```properties
+# Load templates directly from the source tree — edits take effect on the next request
+boxlang.prefix=file:src/main/resources/templates/
+
+# Enable BoxLang debug mode
+boxlang.debug-mode=true
+```
+
+The path `file:src/main/resources/templates/` is relative to the JVM working directory. When you run `./gradlew bootRun` from the project root the working directory is the project folder, so the path resolves correctly.
+
+#### 2. Activate the dev profile
+
+```bash
+./gradlew bootRun --args='--spring.profiles.active=dev'
+```
+
+Or set it permanently during development in `application.properties`:
+
+```properties
+spring.profiles.active=dev
+```
+
+> **Note:** Keep the `classpath:` prefix for the default / production profile. The `file:` path works for local development but should not be used in packaged JARs or containers where the source tree is not available.
+
 ## Building from Source
 
 ```bash
