@@ -20,5 +20,6 @@ src/test/resources/libs/
 miniserver.json
 
 # TestApp
+test-app/.boxlang/**
 test-app/build/**
 test-app/logs/**

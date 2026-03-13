@@ -107,11 +107,11 @@ public class BoxLangAutoConfiguration implements SmartLifecycle, ResourceLoaderA
 		boolean	debugMode	= this.properties.isDebugMode();
 		String	runtimeHome	= ( this.properties.getRuntimeHome() != null && !this.properties.getRuntimeHome().isBlank() )
 		    ? this.properties.getRuntimeHome()
-		    : null;
+		    : Path.of( System.getProperty( "user.dir" ), ".boxlang" ).toString();
 		logger.info( "BoxLang: initialising runtime (config='{}', debug={}, runtimeHome='{}')",
 		    configPath != null ? configPath : "<defaults>",
 		    debugMode,
-		    runtimeHome != null ? runtimeHome : "<default: ~/.boxlang>" );
+		    runtimeHome );
 
 		// Initialise the BoxLang runtime. This will block until the runtime is fully started and ready to execute templates.
 		BoxRuntime

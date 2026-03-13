@@ -46,7 +46,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * # Enable BoxLang debug mode (default: false)
  * boxlang.debug-mode=false
  *
- * # Override the BoxLang runtime home directory (default: null — uses ~/.boxlang)
+ * # Override the BoxLang runtime home directory (default: <startDir>/.boxlang — where startDir is user.dir)
  * # boxlang.runtime-home=/path/to/boxlang-home
  * </pre>
  */
@@ -114,8 +114,9 @@ public class BoxLangProperties {
 	 * Override the BoxLang runtime home directory.
 	 *
 	 * The runtime home is where BoxLang stores its modules, cache, and other
-	 * runtime artefacts. When {@code null} (the default), BoxLang uses its
-	 * built-in default: {@code ${user.home}/.boxlang}.
+	 * runtime artefacts. When {@code null} or blank (the default), the
+	 * auto-configuration uses {@code <startDir>/.boxlang} where
+	 * {@code <startDir>} is the JVM working directory ({@code user.dir}).
 	 *
 	 * Typical overrides:
 	 * <ul>
@@ -123,7 +124,7 @@ public class BoxLangProperties {
 	 * <li>{@code /mnt/boxlang} — volume-mounted path in Kubernetes</li>
 	 * </ul>
 	 *
-	 * Default: {@code null}
+	 * Default: {@code null} (resolved to {@code ${user.dir}/.boxlang})
 	 */
 	private String	runtimeHome			= null;
 
