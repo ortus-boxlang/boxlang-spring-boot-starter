@@ -109,7 +109,7 @@ You can find all the documentation about the BoxLang templating language here: h
 
 ```groovy
 dependencies {
-    implementation 'ortus.boxlang:boxlang-spring-boot-starter:1.0.0'
+    implementation 'io.boxlang:boxlang-spring-boot-starter:1.0.0'
 }
 ```
 
@@ -117,7 +117,7 @@ dependencies {
 
 ```xml
 <dependency>
-    <groupId>ortus.boxlang</groupId>
+    <groupId>io.boxlang</groupId>
     <artifactId>boxlang-spring-boot-starter</artifactId>
     <version>1.0.0</version>
 </dependency>
@@ -313,7 +313,7 @@ boxlang:
 
 logging:
   level:
-    ortus.boxlang: WARN
+    io.boxlang: WARN
     org.springframework.web: INFO
 ```
 
