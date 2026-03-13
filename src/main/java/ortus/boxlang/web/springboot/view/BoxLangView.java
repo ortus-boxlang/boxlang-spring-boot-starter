@@ -17,6 +17,7 @@
  */
 package ortus.boxlang.web.springboot.view;
 
+import java.io.IOException;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -126,7 +127,7 @@ public class BoxLangView implements View {
 			}
 
 			// --- Execute the .bxm template ---
-			BoxRuntime.getInstance().executeTemplate( this.templateResource.getURL(), context );
+			BoxRuntime.getInstance().executeTemplate( resolveTemplatePath(), context );
 
 			// --- Flush BoxLang output buffer → servlet response writer ---
 			context.flushBuffer( true );
@@ -134,6 +135,41 @@ public class BoxLangView implements View {
 		} finally {
 			context.shutdown();
 			RequestBoxContext.removeCurrent();
+		}
+	}
+
+	// -----------------------------------------------------------------------
+	// Helpers
+	// -----------------------------------------------------------------------
+
+	/**
+	 * Resolve the template resource to a path string suitable for
+	 * {@link BoxRuntime#executeTemplate(String, ortus.boxlang.runtime.context.IBoxContext)}.
+	 *
+	 * <p>
+	 * {@code BoxRuntime.executeTemplate(URL)} calls {@code Path.of(url.toURI())}
+	 * internally, which throws {@code IllegalArgumentException: URI is not hierarchical}
+	 * for relative {@code file:} URLs produced when {@code boxlang.prefix} is set to a
+	 * relative filesystem path (e.g. {@code file:src/main/resources/templates/} in dev).
+	 * </p>
+	 *
+	 * <p>
+	 * When the resource is on disk (exploded classpath or {@code file:} prefix) we
+	 * resolve it to an absolute path. For resources inside a packaged JAR the URL
+	 * approach works fine so we fall back to {@code getURL().toExternalForm()}.
+	 * </p>
+	 *
+	 * @return absolute path or external URL string for the template
+	 *
+	 * @throws IOException if the resource cannot be accessed
+	 */
+	private String resolveTemplatePath() throws IOException {
+		try {
+			// Works for file: resources and exploded classpath (dev / bootRun)
+			return this.templateResource.getFile().getAbsolutePath();
+		} catch ( IOException jarEx ) {
+			// Resource is inside a packaged JAR — the URL form works fine with BoxRuntime
+			return this.templateResource.getURL().toExternalForm();
 		}
 	}
 

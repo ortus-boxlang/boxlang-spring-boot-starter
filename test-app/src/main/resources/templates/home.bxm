@@ -22,6 +22,12 @@
 		<li><a href="/greeting?name=Developer">Greeting with name</a></li>
 		<li><a href="/items">Items list</a></li>
 	</ul>
+
+	<hr>
+	<bx:dump var="#url#" expand="false">
+	<bx:dump var="#form#" expand="false">
+	<bx:dump var="#request#" expand="false">
+	<bx:dump var="#server.boxlang#">
 </body>
 </html>
 </bx:output>
