@@ -5,7 +5,7 @@ import java.util.Date
 plugins {
     id 'java-library'
     // For source code formatting
-    id "com.diffplug.spotless" version "8.1.0"
+    id "com.diffplug.spotless" version "8.3.0"
     // Shadow (fat jar for standalone use)
     id "com.gradleup.shadow" version "9.3.0"
 	// Download task
