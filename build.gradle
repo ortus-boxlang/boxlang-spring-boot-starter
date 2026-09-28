@@ -1,3 +1,5 @@
+import java.nio.file.StandardCopyOption
+import java.nio.file.Files
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -105,6 +107,53 @@ shadowJar {
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 	mergeServiceFiles()
 }
+
+/**
+ * Generate checksums for the given file using the specified algorithm
+
+ * @param file The file to generate the checksum for
+ * @param algorithm The algorithm to use (e.g., "SHA-256", "MD5")
+ */
+def generateChecksum( File file, String algorithm ) {
+	def digest = java.security.MessageDigest.getInstance( algorithm )
+	file.eachByte( 4096 ) { bytes, size ->
+		digest.update( bytes, 0, size )
+	}
+	def checksum = digest.digest().collect { String.format( '%02x', it ) }.join()
+
+	def checksumFile = new File( file.parent, "${file.name}.${algorithm.toLowerCase()}" )
+	checksumFile.text = "${checksum}  ${file.name}\n"
+}
+
+/**
+ * Generates checksums for the distribution jar and copies it, along with the
+ * version.properties, into the evergreen folder as latest/snapshot aliases
+ */
+task buildEvergreen {
+	doLast {
+		def distJar = file( "build/distributions/boxlang-spring-boot-starter-${version}.jar" )
+		generateChecksum( distJar, 'SHA-256' )
+		generateChecksum( distJar, 'MD5' )
+
+		file( "build/evergreen" ).mkdirs()
+		if( branch == 'development' ){
+			Files.copy( file( "build/resources/main/META-INF/boxlang-spring-boot-starter/version.properties" ).toPath(), file( "build/evergreen/version-snapshot.properties" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+			Files.copy( distJar.toPath(), file( "build/evergreen/boxlang-spring-boot-starter-snapshot.jar" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+			// Checksums
+			Files.copy( file( "build/distributions/boxlang-spring-boot-starter-${version}.jar.sha-256" ).toPath(), file( "build/evergreen/boxlang-spring-boot-starter-snapshot.jar.sha-256" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+			Files.copy( file( "build/distributions/boxlang-spring-boot-starter-${version}.jar.md5" ).toPath(), file( "build/evergreen/boxlang-spring-boot-starter-snapshot.jar.md5" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+		} else {
+			Files.copy( file( "build/resources/main/META-INF/boxlang-spring-boot-starter/version.properties" ).toPath(), file( "build/evergreen/version-latest.properties" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+			Files.copy( distJar.toPath(), file( "build/evergreen/boxlang-spring-boot-starter-latest.jar" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+			// Checksums
+			Files.copy( file( "build/distributions/boxlang-spring-boot-starter-${version}.jar.sha-256" ).toPath(), file( "build/evergreen/boxlang-spring-boot-starter-latest.jar.sha-256" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+			Files.copy( file( "build/distributions/boxlang-spring-boot-starter-${version}.jar.md5" ).toPath(), file( "build/evergreen/boxlang-spring-boot-starter-latest.jar.md5" ).toPath(), StandardCopyOption.REPLACE_EXISTING )
+		}
+
+		println "+ Evergreen distributions created"
+	}
+}
+shadowJar.finalizedBy( buildEvergreen )
 
 // Relax Javadoc doclint: the html5 standard no longer mandates strict heading sequence
 // and missing-comment warnings (-Xdoclint:none suppresses all lint; we keep syntax checks).
